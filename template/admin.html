@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/css/simplecss.css">
+    <link rel="stylesheet" href="/css/admin.css">
+    <script src="/js/ajax.js"></script>
+</head>
+<body>
+<div class="nav">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-10">
+                <a href="/admin">螺钉后台管理系统</a>
+                <a href="" class="btn btn-success" id="add-btn">添加用户</a>
+            </div>
+            <div class="col-md-2"><a href="/logout">退出系统</a></div>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-bordered" id="table">
+                <tr>
+                    <th>客户编号</th>
+                    <th>姓名</th>
+                    <th>邮箱</th>
+                    <th>电话</th>
+                    <th>QQ</th>
+                    <th>操作</th>
+                </tr>
+                <!--<tr>-->
+                    <!--<td>1</td>-->
+                    <!--<td>张三</td>-->
+                    <!--<td>1@qq.com</td>-->
+                    <!--<td>135999888899</td>-->
+                    <!--<td>2014868983</td>-->
+                    <!--<td>-->
+                        <!--<a href="" class="btn btn-primary">修改</a>-->
+                        <!--<a href="" class="btn btn-danger">删除</a>-->
+                    <!--</td>-->
+                <!--</tr>-->
+            </table>
+        </div>
+    </div>
+</div>
+<!--添加用户panel-->
+<div class="panel panel-default" id="adduser">
+    <div class="panel-heading">
+        <div class="panel-title">添加用户</div>
+    </div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-md-4">姓名</div>
+            <div class="col-md-8"><input type="text" id="username"></div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">邮箱</div>
+            <div class="col-md-8"><input type="text" id="email"></div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">电话</div>
+            <div class="col-md-8"><input type="text" id="phone"></div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">QQ</div>
+            <div class="col-md-8"><input type="text" id="qq"></div>
+        </div>
+    </div>
+    <div class="panel-footer">
+        <button class="btn btn-primary" id="save-btn">保存</button>
+        <button class="btn btn-primary" id="cancel-btn">取消</button>
+    </div>
+</div>
+
+<!--编辑用户 panel-->
+<div class="panel panel-default" id="editUser">
+    <div class="panel-heading">
+        <div class="panel-title">编辑用户信息</div>
+    </div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-md-4">姓名</div>
+            <div class="col-md-8"><input type="text" id="edit-username"></div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">邮箱</div>
+            <div class="col-md-8"><input type="text" id="edit-email"></div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">电话</div>
+            <div class="col-md-8"><input type="text" id="edit-phone"></div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">QQ</div>
+            <div class="col-md-8">
+                <input type="text" id="edit-qq">
+                <!-- 当后台需要使用这个input数据，又不希望在前台显示出来时用hidden -->
+                <input type="hidden" id="edit-id">
+            </div>
+        </div>
+    </div>
+    <div class="panel-footer">
+        <button class="btn btn-primary" id="edit-save-btn">保存</button>
+        <button class="btn btn-primary" id="edit-cancel-btn">取消</button>
+    </div>
+</div>
+
+<script>
+    /**
+     * 当admin.html这个页面被浏览器加载的时候，马上要去发送数据请求到后台，让后台返回数据给这个页面
+     * 这个页面拿到数据后，生成table
+     **/
+    var oTable = document.getElementById('table');
+
+    ajax({
+        method: 'GET',
+        url:'/list',
+        data:'',
+        success:function(result){
+            /**
+             *  console.log(result);
+             * 此时得到的result为
+             * {status:0, data:[{id: 1, username: "张三", email: "1@sina.com", phone: "13899998888", qq: "201112348"}
+             *                 ,{id: 2, username: "李四", email: "2@sina.com", phone: "12399998888", qq: "201314644"}]
+             * }
+             * 通过其来生成table表格
+            **/
+           if(result.status === 0){
+                // 1. result.data是一个数组，每个元素为对象
+                // 2. 对象中的内容就是每行的内容
+                // 3. 每个对象需要生成一个tr，对象中每个属性（id username...）对应着一个td
+                // 4. 批量生成行需要用到循环
+                for(var i = 0;i<result.data.length;i++){
+                    //生成每行，每次循环的时候创建一个tr
+                    var oTr = document.createElement("tr");
+                    // 将循环得到的每一个数组中的对象元素赋值给obj
+                    var obj = result.data[i];
+                    // 循环obj中的每个属性拿到对应的属性值，并将其存储在td中，内层循环完成表现已经创建好了一行tr
+                    for(var item in obj){
+                        // item是data数组中的对象中的属性名，可以通过其来获取属性值
+
+                        // 每次得到一个属性值时，创建一个td。将该值存放在td中
+                        var oTd = document.createElement('td');
+                        oTd.innerHTML = obj[item];
+
+                        // 把存有值得td添加到父元素tr中
+                        oTr.appendChild(oTd);
+                    }
+
+                    //遇到的问题，tr中少了一个td，需要手动添加上
+                    // op是手动创建的td，并添加到tr中
+                    var op = document.createElement('td');
+                    op.innerHTML = '<a href="" class="btn btn-primary">修改</a>\n'+
+                                    '<a href="" class="btn btn-danger">删除</a>';
+                    oTr.appendChild(op);
+
+                    // 把创建好的tr添加到table中
+                    oTable.appendChild(oTr);
+                }
+            }
+        }
+    })
+
+    // 需求：点击添加按钮，弹出添加的对话框
+    var addBtn = document.getElementById("add-btn");
+    var addUser = document.getElementById("adduser");
+    addBtn.onclick = function(){
+        // 使对话框显示
+        addUser.style.display = "block";
+
+        // 使对话框居中
+        var left = document.documentElement.clientWidth/2 - addUser.offsetWidth/2;
+        var top = document.documentElement.clientHeight/2 - addUser.offsetHeight/2;
+        addUser.style.left = left + 'px';
+        addUser.style.top = top + 'px';
+        return false;
+    }
+
+    /** 需求：点击取消按钮时，隐藏对话框，不发数据到后台
+     *        点击保存按钮时，收集用户输入数据发送到后台，并关闭对话框
+    **/
+   var cancelBtn = document.getElementById("cancel-btn");
+   cancelBtn.onclick = function(){
+       addUser.style.display = 'none';
+   }
+
+   var saveBtn = document.getElementById("save-btn");
+
+   saveBtn.onclick = function(){
+       var oUser = document.getElementById("username");
+       var oEmail = document.getElementById("email");
+       var oPhone = document.getElementById("phone");
+       var oQq = document.getElementById("qq");
+       
+    //    将获取的数据发送给后台
+        ajax({
+            method:'POST',
+            url:'/adduser',
+            data:"username="+oUser.value+"&email="+oEmail.value+"&phone="+oPhone.value+"&qq="+oQq.value,
+            success:function(result){
+                // 业务处理逻辑
+                if(result.status === 0){
+                    // 将对话框隐藏 弹出消息 重新刷新admin.html页面
+                    addUser.style.display = "none";
+                    alert(result.message);
+                    window.location.href = '/admin.html';
+                }else{
+                    alert(result.message);
+                }
+            }
+        })
+   } 
+
+
+   //需求：点击修改按钮弹出对话框
+   //通过实践委托来实现新增tr的时候点击修改的按钮
+   var editUser = document.getElementById("editUser");
+
+   var editUsername = document.getElementById("edit-username");
+   var editEmail = document.getElementById("edit-email");
+   var editPhone = document.getElementById("edit-phone");
+   var editQq = document.getElementById("edit-qq");
+   var editId = document.getElementById("edit-id");
+
+   oTable.onclick = function(ev){
+       var ev = ev || window.ev;
+       var aTd = ev.target.parentNode.parentNode.children;//得到点击按钮的父元素的父元素的子元素即点击按钮所在行的所有td
+       if(ev.target.innerHTML === '修改'){
+            //    弹出对话框，并显示出当前行的数据
+            // 使对话框显示
+            editUser.style.display = "block";
+
+            // 使对话框居中
+            var left = document.documentElement.clientWidth/2 - editUser.offsetWidth/2;
+            var top = document.documentElement.clientHeight/2 - editUser.offsetHeight/2;
+            editUser.style.left = left + 'px';
+            editUser.style.top = top + 'px';
+
+            // 显示当前行的信息
+            editId.value = aTd[0].innerHTML;
+            editUsername.value = aTd[1].innerHTML;
+            editEmail.value = aTd[2].innerHTML;
+            editPhone.value = aTd[3].innerHTML;
+            editQq.value = aTd[4].innerHTML;
+            
+       }
+       if(ev.target.innerHTML === '删除'){
+            // 只需要发送id到后台，后台进行删除操作。这里需要刷新页面
+            ajax({
+                method:'POST',
+                url:'/delete',
+                data:'id='+aTd[0].innerHTML,
+                success:function(result){
+                    if(result.status === 0){
+                        
+                        //刷新页面
+                       window.location.href = '/admin.html';
+                       // 提示
+                       alert(result.message);
+                    }else{
+                        alert(result.message);
+                    }
+                }
+            })
+       }
+
+       //点击取消隐藏对话框
+       var editCancelBtn = document.getElementById("edit-cancel-btn");
+       editCancelBtn.onclick = function(){
+           editUser.style.display = "none";
+       }
+       // 点击保存按钮 发送数据到后台
+       var editSaveBtn = document.getElementById("edit-save-btn");
+       editSaveBtn.onclick = function(){
+           ajax({
+               method: 'POST',
+               url:'/update',
+               data:"username="+editUsername.value+"&email="+editEmail.value+"&phone="+editPhone.value+"&qq="+editQq.value+"&id="+editId.value,
+               success:function(result){
+                   if(result.status === 0){
+                       //关闭弹窗
+                       editUser.style.display = "none";
+                       //提示信息
+                       alert(result.message);
+                         
+                       //刷新页面
+                       window.location.href = '/admin.html';    
+                   }else{
+                    alert(result.message);
+                   }
+               } 
+           })
+       }
+
+       return false;
+   }
+
+
+
+</script>
+</body>
+</html>

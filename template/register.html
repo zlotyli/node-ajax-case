@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/css/simplecss.css">
+    <link rel="stylesheet" href="/css/index.css">
+    <script src="/js/ajax.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div id="login">
+            <div class="title">欢迎注册Nodeing会员</div>
+            <form action="">
+                <div class="content">
+                    <div class="row form-group">
+                        <div class="col-md-4">
+                            <label for="">用户名:</label>
+                        </div>
+                        <div class="col-md-8"><input type="text" id="username"></div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-4">
+                            <label for="">密码:</label>
+                        </div>
+                        <div class="col-md-8"><input type="password" id="password"></div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-4">
+                            <label for="">确认密码:</label>
+                        </div>
+                        <div class="col-md-8"><input type="password" id="repassword"></div>
+                    </div>
+                    <div class="row form-group btn-wrap">
+                        <button id="reg" type="button" class="btn btn-danger">注册</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        /**
+         * 1.收集用户输入的信息
+         * 2.点击注册，发送信息到后台
+         */
+        var oUser = document.getElementById("username");
+        var oPass = document.getElementById("password");
+        var oRePass = document.getElementById("repassword");
+        var oRegBtn = document.getElementById("reg");
+        // 2.点击注册，发送信息到后台
+        oRegBtn.onclick = function(){
+            ajax({
+                method: 'POST',
+                url: '/register',
+                data: "username="+oUser.value+"&password="+oPass.value+"&repassword="+oRePass.value,
+                success:function(result){
+                    // 此时result里面为服务器响应的对象{status:...,message:...};
+                    if(result.status === 0){
+                        //此时代表正确
+                        window.location.href = "/login.html"; 
+                    }else{
+                        // 此时注册页输入不正确
+                        alert(result.message);
+                    }
+                } 
+            })
+        }
+    </script>
+</body>
+</html>
